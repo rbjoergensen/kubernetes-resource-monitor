@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cronjob-kubernetes-resource-monitor
+  namespace: default
+spec:
+  schedule: "*/5 * * * *" # Every 5 minutes
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: sa-cronjob-kubernetes-resource-monitor
+          containers:
+          - name: cronjob-kubernetes-resource-monitor
+            image: cotv/kubernetes-resource-monitor:1.0.0
+            envFrom:
+            - secretRef:
+                name: secret-kubernetes-resource-monitor
+            env:
+            - name: NODE_FILTER
+              value: "worker"
+            - name: CLUSTER
+              value: "MyProdCluster"
+            - name: ELASTIC_URL
+              value: "https://elastic.cotv.dk:9200"
+          restartPolicy: OnFailure
