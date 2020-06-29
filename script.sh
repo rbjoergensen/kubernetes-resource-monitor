@@ -48,7 +48,7 @@ requested_mem_percent=$(awk "BEGIN {printf \"%.2f\n\", ($requested_mem/$capacity
 allocated_pods_percent=$(awk "BEGIN {printf \"%.2f\n\", ($allocated_pods/$capacity_pods)*100}")
 
 ### Post data ###################################
-curl -X POST -u $elasticuser:$elasticpass -H "Content-Type: application/json" "$elasticurl/$indexname/_doc" -d '
+curl -X --insecure POST -u $elasticuser:$elasticpass -H "Content-Type: application/json" "$elasticurl/$indexname/_doc" -d '
 {
     "timestamp":"'"$(date +%Y-%m-%dT%H:%M:%S)"'",
     "cluster":"'$cluster'",
