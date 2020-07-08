@@ -21,10 +21,10 @@ fi
 
 ### Requests ####################################
 # Get requsted cpu in milli-cpu(m)
-requested_cpu=$(kubectl get po --all-namespaces -o=jsonpath="{range .items[*]}{.spec.nodeName}{range .spec.containers[*]}  {.resources.requests.cpu}{'\n'}{end}{'\n'}{end}" | 
+requested_cpu=$(kubectl get po --all-namespaces -o=jsonpath="{range .items[*]}{.spec.nodeName}{range .spec.containers[*]}  {.resources.requests.cpu}{'\n'}{end}{'\n'}{end}" |
     awk '/'$nodefilter'/' | awk {'print $2'} | awk NF | sed 's/[^0-9]*//g' | awk '{s+=$1} END {print s}')
 # Get requested mem in mb(M)
-requested_mem=$(kubectl get po --all-namespaces -o=jsonpath="{range .items[*]}{.spec.nodeName}{range .spec.containers[*]}  {.resources.requests.memory}{'\n'}{end}{'\n'}{end}" | 
+requested_mem=$(kubectl get po --all-namespaces -o=jsonpath="{range .items[*]}{.spec.nodeName}{range .spec.containers[*]}  {.resources.requests.memory}{'\n'}{end}{'\n'}{end}" |
     awk '/'$nodefilter'/' | awk {'print $2'} | awk NF | sed 's/[^0-9]*//g' | awk '{s+=$1} END {print s}')
 # Get allocated pod count
 allocated_pods=$(kubectl get pod -o=custom-columns=NODE:.spec.nodeName --all-namespaces | grep $nodefilter | wc -l)
@@ -36,7 +36,7 @@ capacity_cpu=$(kubectl get no -o json | jq -r '.items | sort_by(.status.capacity
 # Get the total memory capacity of all worker nodes
 capacity_mem=$(kubectl get no -o json | jq -r '.items | sort_by(.status.capacity.memory)[]|[.metadata.name,.status.capacity.memory]| @tsv' |
     awk '/'$nodefilter'/' | awk {'print $2'} | sed 's/[^0-9]*//g' | awk '{print $1/1024}' | awk '{print int($1)}' | awk '{s+=$1} END {print s}')
-capacity_pods=$(kubectl get no -o json | jq -r '.items | sort_by(.status.capacity.pods)[]|[.metadata.name,.status.capacity.pods]| @tsv' | 
+capacity_pods=$(kubectl get no -o json | jq -r '.items | sort_by(.status.capacity.pods)[]|[.metadata.name,.status.capacity.pods]| @tsv' |
     awk '/'$nodefilter'/' | awk '{print int($2)}' | awk '{s+=$1} END {print s}')
 
 ### Percentages #################################
@@ -107,5 +107,3 @@ for str in ${deploymentStatuses// / } ; do
     curl -k -X POST -u $elasticuser:$elasticpass -H "Content-Type: application/json" "$elasticurl/$indexname/_doc" -d '
     {"timestamp":"'"$(date +%Y-%m-%dT%H:%M:%S)"'","cluster":"'$cluster'","namespace":"'${value[0]}'","depstatus.deploymentName":"'${value[1]}'","depstatus.availableReplicas":'${availableReplicas}',"depstatus.readyReplicas":'${readyReplicas}',"depstatus.replicas":'${value[4]}',"depstatus.updatedReplicas":'${value[5]}',"depstatus.unavailableReplicas":'${unavailableReplicas}'}'
 done
-
-readyReplicas
