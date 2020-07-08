@@ -2,7 +2,7 @@ apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: cronjob-kubernetes-resource-monitor
-  namespace: default
+  namespace: kube-system
 spec:
   schedule: "*/5 * * * *" # Every 5 minutes
   successfulJobsHistoryLimit: 2
@@ -14,15 +14,21 @@ spec:
           serviceAccountName: sa-cronjob-kubernetes-resource-monitor
           containers:
           - name: cronjob-kubernetes-resource-monitor
-            image: cotv/kubernetes-resource-monitor:1.0.0
+            image: cotv/kubernetes-resource-monitor:1.0.2
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128M
             envFrom:
             - secretRef:
                 name: secret-kubernetes-resource-monitor
             env:
             - name: NODE_FILTER
-              value: "worker"
+              value: "k8s-00-dev-wor"
             - name: CLUSTER
-              value: "MyProdCluster"
+              value: "k8s-00-dev"
             - name: ELASTIC_URL
-              value: "https://elastic.cotv.dk:9200"
+              value: "https://elasticsearch.cotv.dk:9200"
           restartPolicy: OnFailure
+          imagePullSecrets:
+            - name: regcred

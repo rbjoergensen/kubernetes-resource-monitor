@@ -47,8 +47,14 @@ requested_mem_percent=$(awk "BEGIN {printf \"%.2f\n\", ($requested_mem/$capacity
 # Calculate allocated pods in percent of capacity
 allocated_pods_percent=$(awk "BEGIN {printf \"%.2f\n\", ($allocated_pods/$capacity_pods)*100}")
 
+### Pod Statuses ################################
+podStatuses=$(kubectl get pods --all-namespaces -o=jsonpath="{range .items[*]}{.metadata.namespace};{.metadata.name};{.status.containerStatuses[0].ready};{.status.containerStatuses[0].restartCount};{.status.containerStatuses[0].started};{.status.phase}{'\n'}{end}")
+
+### Deployment Statuses #########################
+deploymentStatuses=$(kubectl get deployments --all-namespaces -o=jsonpath="{range .items[*]}{.metadata.namespace};{.metadata.name};{.status.availableReplicas};{.status.readyReplicas};{.status.replicas};{.status.updatedReplicas};{.status.unavailableReplicas}{'\n'}{end}")
+
 ### Post data ###################################
-curl -X POST -u $elasticuser:$elasticpass -H "Content-Type: application/json" "$elasticurl/$indexname/_doc" -d '
+curl -k -X POST -u $elasticuser:$elasticpass -H "Content-Type: application/json" "$elasticurl/$indexname/_doc" -d '
 {
     "timestamp":"'"$(date +%Y-%m-%dT%H:%M:%S)"'",
     "cluster":"'$cluster'",
@@ -62,3 +68,44 @@ curl -X POST -u $elasticuser:$elasticpass -H "Content-Type: application/json" "$
     "requests.mem-percent":'$requested_mem_percent',
     "allocated.pods-percent":'$allocated_pods_percent'
 }'
+
+for str in ${podStatuses// / } ; do
+    IFS=';' read -ra value <<< "$str"
+    curl -k -X POST -u $elasticuser:$elasticpass -H "Content-Type: application/json" "$elasticurl/$indexname/_doc" -d '
+    {"timestamp":"'"$(date +%Y-%m-%dT%H:%M:%S)"'","cluster":"'$cluster'","namespace":"'${value[0]}'","podstatus.podName":"'${value[1]}'","podstatus.containerStatus":"'${value[2]}'","podstatus.restartCount":'${value[3]}',"podstatus.started":"'${value[4]}'","podstatus.phase":"'${value[5]}'"}'
+done
+
+for str in ${deploymentStatuses// / } ; do
+    IFS=';' read -ra value <<< "$str"
+    availableReplicas="null"
+    readyReplicas="null"
+    unavailableReplicas="null"
+    # Set availableReplicas to 0 if it doesn't exist
+    if [ -z "${value[2]}" ]
+    then
+        echo "\$availableReplicas is NULL setting to 0"
+        availableReplicas="0"
+    else
+        availableReplicas="${value[2]}"
+    fi
+    # Set readyReplicas to 0 if it doesn't exist
+    if [ -z "${value[3]}" ]
+    then
+        echo "\$readyReplicas is NULL setting to 0"
+        readyReplicas="0"
+    else
+        readyReplicas="${value[3]}"
+    fi
+    # Set unavailableReplicas to 0 if it doesn't exist
+    if [ -z "${value[6]}" ]
+    then
+        echo "\$unavailableReplicas is NULL setting to 0"
+        unavailableReplicas="0"
+    else
+        unavailableReplicas="${value[6]}"
+    fi
+    curl -k -X POST -u $elasticuser:$elasticpass -H "Content-Type: application/json" "$elasticurl/$indexname/_doc" -d '
+    {"timestamp":"'"$(date +%Y-%m-%dT%H:%M:%S)"'","cluster":"'$cluster'","namespace":"'${value[0]}'","depstatus.deploymentName":"'${value[1]}'","depstatus.availableReplicas":'${availableReplicas}',"depstatus.readyReplicas":'${readyReplicas}',"depstatus.replicas":'${value[4]}',"depstatus.updatedReplicas":'${value[5]}',"depstatus.unavailableReplicas":'${unavailableReplicas}'}'
+done
+
+readyReplicas

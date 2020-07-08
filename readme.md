@@ -1,6 +1,6 @@
 ### Kubernetes resource collector
 
-Docker image for collecting resource usage in Kubernetes and sending them to Elasticsearch.
+Docker image for collecting resource usage and pod and deployment statuses in Kubernetes and sending them to Elasticsearch.
 
 The following environment variables are required to run.
 
@@ -27,4 +27,6 @@ clear; $version=1.0.0; docker build -t cotv/kubernetes-resource-monitor:$version
 kubectl apply -f cronjob.yml
 clear ; kubectl get cronjobs ; kubectl get jobs ; kubectl get pods
 kubectl run test-debian-shell --rm -i --tty --serviceaccount=sa-cronjob-kubernetes-resource-monitor --image cotv/kubernetes-resource-monitor:1.0.0 -- bash
+kubectl create secret generic secret-kubernetes-resource-monitor --from-literal=ELASTIC_USER="" --from-literal=ELASTIC_PASS=""
+kubectl create secret docker-registry regcred --docker-server=<your-registry-server> --docker-username=<your-name> --docker-password=<your-pword> --docker-email=<your-email>
 ```
