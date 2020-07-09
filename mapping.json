@@ -1,0 +1,139 @@
+{
+    "cluster-resources-cluster1-2020.07.08-000001" : {
+      "mappings" : {
+        "properties" : {
+          "allocated" : {
+            "properties" : {
+              "pods-percent" : {
+                "type" : "float"
+              }
+            }
+          },
+          "capacity" : {
+            "properties" : {
+              "cpu" : {
+                "type" : "long"
+              },
+              "mem" : {
+                "type" : "long"
+              },
+              "pods" : {
+                "type" : "long"
+              }
+            }
+          },
+          "cluster" : {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "ignore_above" : 256
+              }
+            }
+          },
+          "depstatus" : {
+            "properties" : {
+              "availableReplicas" : {
+                "type" : "long"
+              },
+              "deploymentName" : {
+                "type" : "text",
+                "fields" : {
+                  "keyword" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+                  }
+                }
+              },
+              "readyReplicas" : {
+                "type" : "long"
+              },
+              "replicas" : {
+                "type" : "long"
+              },
+              "unavailableReplicas" : {
+                "type" : "long"
+              },
+              "updatedReplicas" : {
+                "type" : "long"
+              }
+            }
+          },
+          "namespace" : {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "ignore_above" : 256
+              }
+            }
+          },
+          "podstatus" : {
+            "properties" : {
+              "containerStatus" : {
+                "type" : "text",
+                "fields" : {
+                  "keyword" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+                  }
+                }
+              },
+              "phase" : {
+                "type" : "text",
+                "fields" : {
+                  "keyword" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+                  }
+                }
+              },
+              "podName" : {
+                "type" : "text",
+                "fields" : {
+                  "keyword" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+                  }
+                }
+              },
+              "restartCount" : {
+                "type" : "long"
+              },
+              "started" : {
+                "type" : "text",
+                "fields" : {
+                  "keyword" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+                  }
+                }
+              }
+            }
+          },
+          "requests" : {
+            "properties" : {
+              "cpu" : {
+                "type" : "long"
+              },
+              "cpu-percent" : {
+                "type" : "float"
+              },
+              "mem" : {
+                "type" : "long"
+              },
+              "mem-percent" : {
+                "type" : "float"
+              },
+              "pods" : {
+                "type" : "long"
+              }
+            }
+          },
+          "timestamp" : {
+            "type" : "date"
+          }
+        }
+      }
+    }
+  }
